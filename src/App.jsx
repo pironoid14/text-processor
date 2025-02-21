@@ -21,6 +21,25 @@ const App = () => {
   const handleInputChange = (e) => {
     setInputText(e.target.value);
   };
+  
+  const languageTagToHumanReadable = (tag, defaultLanguage) => {
+    const languageNames = {
+      en: 'English',
+      pt: 'Portuguese',
+      es: 'Spanish',
+      ru: 'Russian',
+      tr: 'Turkish',
+      fr: 'French',
+    };
+    return languageNames[tag] || defaultLanguage;
+  };
+
+  const detector = {
+    detect: async (text) => {
+       text='en';
+      return { detectedLanguage: text, confidence: 0.99 };
+    },
+  };
 
   const handleSendMessage = async () => {
     if (inputText.trim() === '') {
@@ -41,22 +60,27 @@ const App = () => {
 
       
     setTimeout(async () => {
-      if (!localInputText.trim()) {
-        alert('What is this text language');
+      const trimmedText = localInputText.trim();
+    
+      if (!trimmedText) {
+        alert('Please enter some text to detect its language.');
         return;
       }
-      const { detectedLanguage, confidence } = (
-        await detector.detect(localInputText.trim())
-      );
-      newOutput.language = `${(confidence * 100).toFixed(
-        1
-      )}% sure that this is ${languageTagToHumanReadable(
-        detectedLanguage,
-        'en'
-      )}`;
-      setOutputText([...outputText, newOutput]);
+    
+      try {
+        const { detectedLanguage, confidence } = await detector.detect(trimmedText);
+        
+    
+        const newOutputLanguage = `${(confidence * 100).toFixed(1)}% sure that this is ${languageTagToHumanReadable(detectedLanguage, 'en')}`;
+    
+        setOutputText([...outputText, { ...newOutput, language: newOutputLanguage }]);
+      } catch (error) {
+        console.error('Error detecting language:', error);
+        alert('Failed to detect language. Please try again.');
+      }
     }, 100);
   };
+    
 
   
 
@@ -93,7 +117,7 @@ const App = () => {
     {outputText.map((message, index) => (
       <div key={index} className="p-4 bg-white rounded-lg shadow-md">
         <p className="text-gray-800">{message.text}</p>
-        <p className="text-sm text-white">Detected Language: {message.language || 'Detecting...'}</p>
+        <p className="text-sm text-[rgba(8,9,29,0.71)]">Detected Language: {message.language || 'Detecting...'}</p>
 
         
 
@@ -123,6 +147,7 @@ const App = () => {
 
   <div className="mt-auto flex items-center space-x-2 p-4 bg-white rounded-t-lg shadow-md">
     <textarea 
+    id='inputTextArea'
       value={inputText} 
       onChange={handleInputChange} 
       placeholder="Type your text here..." 
