@@ -121,7 +121,7 @@ const App = () => {
 
         
 
-        <div className="mt-2 flex items-center space-x-2">
+        <div className="mt-2 md:flex items-center space-x-2">
           <select 
             value={selectedLanguage} 
             onChange={(e) => setSelectedLanguage(e.target.value)}
